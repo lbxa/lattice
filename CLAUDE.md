@@ -24,12 +24,13 @@ bun run lint         # eslint, flat config auto-discovered from eslint.config.mj
 bun run typecheck    # tsc --noEmit
 bun run verify       # lint + typecheck (what the Stop hook runs)
 bun run verify:full  # verify + production build
+bun run test         # bun's built-in runner; covers the pure compositor logic
 ```
 
 `scripts/setup.sh` provisions a fresh checkout or worktree: `bun install`, plus a
 build to generate the route types described below.
 
-No test framework is configured. If you add one, add its script here.
+Tests use Bun's built-in runner (`bun test`); pure logic only — UI is verified in the browser.
 
 ## Toolchain notes
 
