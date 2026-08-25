@@ -1,5 +1,5 @@
-import { Sky } from "@/components/sky/Sky";
+import { Desktop } from "@/components/desktop/Desktop";
 
 export default function Home() {
-  return <Sky />;
+  return <Desktop />;
 }
