@@ -1,4 +1,0 @@
-interface:
-  display_name: "HALO Sprint"
-  short_description: "Run an evidence-gated HALO engineering sprint"
-  default_prompt: "Use $halo-sprint to start, inspect, or resume an evidence-gated HALO engineering sprint."

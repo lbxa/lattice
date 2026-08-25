@@ -54,12 +54,50 @@ if [ -z "$WORKTREE_PATH" ]; then
 fi
 
 # The event carries no base ref, so mirror Claude Code's default of branching
-# from the remote default branch and fall back to local HEAD when there is no
-# cached origin/HEAD. Nothing is fetched here; run `git fetch` for a newer base.
+# from the remote default branch. Nothing is fetched here; run `git fetch` for a
+# newer base.
+#
+# A clone made with `git clone` caches origin/HEAD, but one created by `git init`
+# plus `git remote add` does not. Resolve it from the remote's cached refs when
+# it is missing, and if it still cannot be determined, say so loudly — branching
+# from whatever happens to be checked out is a silent way to base a worktree on
+# mid-feature work.
+if ! git -C "$SCRIPT_DIR" rev-parse --verify --quiet origin/HEAD >/dev/null 2>&1; then
+  if git -C "$SCRIPT_DIR" remote get-url origin >/dev/null 2>&1; then
+    # --auto would query the network; prefer the already-fetched refs.
+    for candidate in main master; do
+      if git -C "$SCRIPT_DIR" rev-parse --verify --quiet "origin/$candidate" >/dev/null 2>&1; then
+        git -C "$SCRIPT_DIR" symbolic-ref "refs/remotes/origin/HEAD" \
+          "refs/remotes/origin/$candidate" >/dev/null 2>&1 || true
+        break
+      fi
+    done
+  fi
+fi
+
 if git -C "$SCRIPT_DIR" rev-parse --verify --quiet origin/HEAD >/dev/null 2>&1; then
   BASE_REF="origin/HEAD"
 else
   BASE_REF="HEAD"
+  printf "WARNING: origin/HEAD is unresolved, so this worktree branches from local HEAD (%s)\n" \
+    "$(git -C "$SCRIPT_DIR" rev-parse --abbrev-ref HEAD 2>/dev/null || echo detached)" >&2
+  printf "         Run 'git fetch origin && git remote set-head origin --auto' for a clean base.\n" >&2
+fi
+
+# A worktree is a checkout of a committed ref: uncommitted edits and unpushed
+# commits in the main checkout are not in it. That includes `scripts/setup.sh`
+# itself, so a change to the provisioning script only reaches new worktrees once
+# it lands in the base ref. Say so rather than letting it be discovered by a
+# worktree that provisions with stale logic.
+if [ "$BASE_REF" = "origin/HEAD" ]; then
+  AHEAD="$(git -C "$SCRIPT_DIR" rev-list --count origin/HEAD..HEAD 2>/dev/null || echo 0)"
+  if [ "$AHEAD" != "0" ]; then
+    printf "NOTE: local HEAD is %s commit(s) ahead of origin/HEAD; those commits are NOT in this worktree.\n" \
+      "$AHEAD" >&2
+  fi
+fi
+if ! git -C "$SCRIPT_DIR" diff --quiet HEAD 2>/dev/null; then
+  printf "NOTE: the main checkout has uncommitted changes; they are NOT in this worktree.\n" >&2
 fi
 
 BRANCH="claude/$(basename "$WORKTREE_PATH")"

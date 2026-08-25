@@ -36,6 +36,7 @@ cleanup() {
   remove_worktree "$EXPLICIT_TARGET" "$EXPLICIT_BRANCH"
   git -C "$REPO_ROOT" worktree prune >/dev/null 2>&1 || true
   rm -f "$OUT_CREATE" "$OUT_REUSE" "$OUT_EXPLICIT" 2>/dev/null || true
+  rm -f "$SENTINEL_ENV" 2>/dev/null || true
 }
 
 OUT_CREATE="$(mktemp)"
@@ -55,6 +56,13 @@ name_payload() {
   printf '{"session_id":"smoke","transcript_path":"/dev/null","cwd":"%s","permission_mode":"default","hook_event_name":"WorktreeCreate","name":"%s"}' \
     "$REPO_ROOT" "$NAME"
 }
+
+# Gitignored files are in no ref, so the worktree can only receive them if setup
+# copies them across. Plant a real one first: without it this assertion passes
+# whether or not the mechanism works.
+SENTINEL_ENV="$REPO_ROOT/.env.smoke-$$"
+SENTINEL_VALUE="worktree-smoke-$$"
+printf 'SMOKE_TOKEN=%s\n' "$SENTINEL_VALUE" > "$SENTINEL_ENV"
 
 printf "==> Creating a worktree from a name-only payload\n"
 if name_payload | "$HOOK" >"$OUT_CREATE"; then
@@ -78,19 +86,22 @@ else
   fail "node_modules is missing from the worktree"
 fi
 
-MISSING_ENV=0
-while IFS= read -r source_env; do
-  relative_path="${source_env#"$REPO_ROOT"/}"
-  [ -f "$TARGET/$relative_path" ] || {
-    printf "     missing: %s\n" "$relative_path"
-    MISSING_ENV=1
-  }
-done < <(find "$REPO_ROOT/apps" "$REPO_ROOT/libs" -maxdepth 2 -name .env.local 2>/dev/null)
-
-if [ "$MISSING_ENV" = "0" ]; then
-  pass "package .env.local files carried over from the main checkout"
+CARRIED="$TARGET/$(basename "$SENTINEL_ENV")"
+if [ ! -f "$CARRIED" ]; then
+  fail "gitignored env file was not carried over to the worktree"
+elif [ "$(cat "$CARRIED")" != "$(cat "$SENTINEL_ENV")" ]; then
+  printf "     expected: %s\n     actual:   %s\n" "$(cat "$SENTINEL_ENV")" "$(cat "$CARRIED")"
+  fail "carried env file does not match the main checkout"
 else
-  fail "package .env.local files were not carried over"
+  pass "gitignored env files carried over from the main checkout"
+fi
+
+# The worktree must not inherit tracked files from the main checkout's dirty
+# working tree — only from the ref it was branched from.
+if git -C "$REPO_ROOT" ls-files --error-unmatch "$(basename "$SENTINEL_ENV")" >/dev/null 2>&1; then
+  fail "sentinel env file is tracked; the carryover assertion proves nothing"
+else
+  pass "sentinel env file is untracked, so carryover was the only way in"
 fi
 
 printf "\n==> Re-running against the existing worktree\n"

@@ -74,8 +74,27 @@ for this single-package app. Two things about the layout are not obvious:
   `scripts/agent-hooks/stop-checks.sh` (lint + typecheck; exit 2 blocks the
   handoff and feeds failures back). `WorktreeCreate` runs
   `.claude/hooks/worktree_create.sh`, which creates the worktree under
-  `.claude/worktrees/` and provisions it via `scripts/setup.sh` — so that script
-  must be **committed**, or worktree creation fails on a checkout of the base ref.
+  `.claude/worktrees/` and provisions it via `scripts/setup.sh`.
+
+### Worktrees provision from the base ref, not your working tree
+
+`worktree_create.sh` branches from `origin/HEAD` and then runs
+**the worktree's own copy** of `scripts/setup.sh`. Three consequences:
+
+- A change to `scripts/setup.sh` does not affect new worktrees until it is
+  committed **and pushed**. Editing it and immediately creating a worktree
+  provisions with the old logic — the hook prints a `NOTE:` when your local
+  state is ahead of the base ref, so watch for it.
+- Gitignored files are in no ref. `setup.sh` therefore copies untracked `.env*`
+  files from the main checkout; without that a worktree's dev server starts
+  silently misconfigured. Anything else gitignored and needed at runtime has to
+  be added to that carryover.
+- `origin/HEAD` must resolve. A `git init` + `git remote add` repo has no cached
+  `origin/HEAD`; the hook now resolves it from `origin/main`/`origin/master` and
+  warns loudly instead of silently branching from whatever is checked out.
+
+Run `bash .claude/hooks/worktree_create.test.sh` after touching either script.
+It creates real worktrees and cleans up after itself.
 
 There is no monorepo tooling here: `turbo` and `bun --filter` do not apply, and
 there are no nested package `AGENTS.md` files.
