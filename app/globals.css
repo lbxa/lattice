@@ -1,26 +1,57 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --chrome: #e8e5de;
+  --chrome-dark: #d4d0c8;
+  --chrome-ink: #1a1815;
+  --chrome-dim: #8a8578;
+  --bevel-light: #ffffff;
+  --bevel-dark: #a8a49a;
+  --outline: #26231e;
+  --select: #2f5ec4;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-chrome: var(--chrome);
+  --color-chrome-dark: var(--chrome-dark);
+  --color-chrome-ink: var(--chrome-ink);
+  --color-chrome-dim: var(--chrome-dim);
+  --color-bevel-light: var(--bevel-light);
+  --color-bevel-dark: var(--bevel-dark);
+  --color-outline: var(--outline);
+  --color-select: var(--select);
+  --font-pixel: var(--font-pixel-chrome), "Courier New", monospace;
+  --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Raised chrome (buttons, window frames, menu bar). */
+@utility bevel-out {
+  box-shadow:
+    inset 1px 1px 0 var(--bevel-light),
+    inset -1px -1px 0 var(--bevel-dark);
+}
+
+/* Sunken chrome (pressed buttons, wells). */
+@utility bevel-in {
+  box-shadow:
+    inset 1px 1px 0 var(--bevel-dark),
+    inset -1px -1px 0 var(--bevel-light);
+}
+
+/* Focused title bar texture. */
+@utility pinstripes {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    color-mix(in srgb, var(--chrome-ink) 12%, transparent) 2px,
+    color-mix(in srgb, var(--chrome-ink) 12%, transparent) 3px
+  );
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  background: #cfe4f6;
+  color: var(--chrome-ink);
+  overflow: hidden; /* the desktop IS the viewport; windows scroll internally */
 }
