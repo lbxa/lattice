@@ -55,3 +55,62 @@ body {
   color: var(--chrome-ink);
   overflow: hidden; /* the desktop IS the viewport; windows scroll internally */
 }
+
+/* --- Sky ---------------------------------------------------------------- */
+
+.sky-base {
+  background: linear-gradient(
+    to bottom,
+    #2557b8 0%,
+    #3f7ad2 30%,
+    #7db2e8 65%,
+    #cfe4f6 100%
+  );
+}
+
+.sky-clouds {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 200%;
+  background-repeat: repeat-x;
+  background-size: 50% 100%;
+  animation: sky-drift linear infinite;
+}
+
+.sky-clouds-far {
+  opacity: 0.5;
+  animation-duration: 300s;
+  background-image:
+    radial-gradient(ellipse 20% 9% at 15% 24%, rgba(255, 255, 255, 0.9), transparent 70%),
+    radial-gradient(ellipse 16% 7% at 38% 14%, rgba(255, 255, 255, 0.7), transparent 70%),
+    radial-gradient(ellipse 24% 8% at 64% 30%, rgba(255, 255, 255, 0.8), transparent 70%),
+    radial-gradient(ellipse 14% 6% at 88% 18%, rgba(255, 255, 255, 0.65), transparent 70%);
+}
+
+.sky-clouds-near {
+  opacity: 0.65;
+  animation-duration: 180s;
+  background-image:
+    radial-gradient(ellipse 26% 12% at 20% 55%, rgba(255, 255, 255, 0.95), transparent 70%),
+    radial-gradient(ellipse 18% 9% at 52% 42%, rgba(255, 255, 255, 0.75), transparent 70%),
+    radial-gradient(ellipse 28% 11% at 76% 60%, rgba(255, 255, 255, 0.85), transparent 70%),
+    radial-gradient(ellipse 12% 6% at 91% 48%, rgba(255, 255, 255, 0.7), transparent 70%);
+}
+
+@keyframes sky-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Faint ordered-dither grain over the whole sky (the "hybrid" retro look). */
+.sky-dither {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Cpath d='M0 0h1v1H0zM2 2h1v1H2z' fill='%23000'/%3E%3C/svg%3E");
+  background-size: 4px 4px;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  image-rendering: pixelated;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky-clouds { animation: none; }
+}
