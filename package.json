@@ -10,7 +10,8 @@
     "typecheck": "tsc --noEmit",
     "test": "bun test",
     "verify": "bun run lint && bun run typecheck",
-    "verify:full": "bun run lint && bun run typecheck && bun run build"
+    "verify:full": "bun run lint && bun run typecheck && bun run build",
+    "deploy": "bun run build && bunx wrangler deploy"
   },
   "dependencies": {
     "next": "16.3.3",

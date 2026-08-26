@@ -31,7 +31,15 @@ bun run typecheck    # tsc --noEmit
 bun run verify       # lint + typecheck (what the Stop hook runs)
 bun run verify:full  # verify + production build
 bun run test         # bun's built-in runner; covers the pure compositor logic
+bun run deploy       # build + deploy the static export to Cloudflare Workers
 ```
+
+The site is a fully static export (`output: "export"` in next.config.ts →
+`out/`), deployed to Cloudflare Workers Static Assets via
+[wrangler.jsonc](wrangler.jsonc); wrangler runs through `bunx` (no local
+dependency — authenticate once with `bunx wrangler login`, or set
+`CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` in CI). `next/image` therefore
+runs `unoptimized` — ship pre-sized project images.
 
 `scripts/setup.sh` provisions a fresh checkout or worktree: `bun install`, plus a
 build to generate the route types described below.

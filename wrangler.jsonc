@@ -1,0 +1,14 @@
+// Cloudflare Workers deployment: serves the static export in ./out
+// (produced by `bun run build`) as a Static Assets-only Worker.
+// Deploy with `bun run deploy` (wrangler runs via bunx; `bunx wrangler login`
+// once, or set CLOUDFLARE_API_TOKEN / CLOUDFLARE_ACCOUNT_ID in CI).
+{
+  "$schema": "https://unpkg.com/wrangler/config-schema.json",
+  "name": "lattice",
+  "compatibility_date": "2026-08-26",
+  "assets": {
+    "directory": "./out",
+    // Serve the exported 404 page for unknown paths.
+    "not_found_handling": "404-page"
+  }
+}
