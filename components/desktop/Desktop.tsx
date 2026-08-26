@@ -73,7 +73,7 @@ export function Desktop() {
         onCloseAll={() => dispatch({ type: "CLOSE_ALL" })}
         onCleanUp={() => dispatch({ type: "CLEAN_UP", viewport: viewport() })}
       />
-      <div className="absolute bottom-3 right-3 top-10 flex flex-col items-center gap-4 max-sm:static max-sm:mt-10 max-sm:grid max-sm:grid-cols-3 max-sm:justify-items-center max-sm:px-4">
+      <div className="absolute bottom-3 right-3 top-10 flex flex-col items-center gap-4 max-sm:relative max-sm:mt-10 max-sm:grid max-sm:grid-cols-3 max-sm:justify-items-center max-sm:px-4">
         {projects.map((project) => (
           <DesktopIcon
             key={project.id}

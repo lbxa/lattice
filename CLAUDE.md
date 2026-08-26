@@ -6,9 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-`lattice` is an unmodified `create-next-app` scaffold (one route, one layout, no
-app code of its own yet). There is no domain architecture to learn — the notes
-below cover the toolchain, which differs from the defaults you may assume.
+`lattice` is a retro desktop landing page: a single route that renders a
+window-manager desktop, not a scaffold. Compositor state (window placement,
+focus, drag/resize gestures) lives in `components/desktop/` as a pure reducer
+plus ref-based pointer gestures. Chrome (window frames, title bars, menu bar,
+desktop icons, pixel glyphs) lives in `components/chrome/`, themed entirely via
+`@theme` tokens in [app/globals.css](app/globals.css) — no JS style config.
+Portfolio content (the project list shown as desktop folders) lives in
+[content/projects.ts](content/projects.ts). The notes below cover the
+toolchain, which differs from the defaults you may assume.
 
 ## Commands
 

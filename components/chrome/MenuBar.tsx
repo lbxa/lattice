@@ -144,5 +144,9 @@ function Clock() {
     return () => window.clearInterval(id);
   }, []);
 
-  return <time suppressHydrationWarning>{time}</time>;
+  return (
+    <time suppressHydrationWarning className="inline-block min-w-[7ch] text-right">
+      {time}
+    </time>
+  );
 }
