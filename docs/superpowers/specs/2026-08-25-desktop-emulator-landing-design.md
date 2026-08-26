@@ -103,6 +103,12 @@ Resilience: each window's content renders inside a small error boundary so a
 broken window component cannot take down the desktop; rects re-clamp on
 browser resize.
 
+Marquee selection (Finder-style, desktop only): dragging on the empty
+desktop draws a translucent rubber-band rectangle (direct DOM writes per
+frame) that live-selects every icon it touches; the selection persists
+after release, a plain background click or Escape clears it, and clicking
+an icon selects just that icon as it opens.
+
 ## UI kit & theming
 
 Design language:

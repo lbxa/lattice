@@ -33,3 +33,17 @@ export function cascadeRect(size: Size, vp: Viewport, index: number): Rect {
 export function windowId(kind: WindowKind, projectId?: string): string {
   return kind === "project" ? `project:${projectId}` : kind;
 }
+
+/** Normalize two drag points into a rect (the drag may go in any direction). */
+export function dragRect(ax: number, ay: number, bx: number, by: number): Rect {
+  return {
+    x: Math.min(ax, bx),
+    y: Math.min(ay, by),
+    w: Math.abs(ax - bx),
+    h: Math.abs(ay - by),
+  };
+}
+
+export function rectsIntersect(a: Rect, b: Rect): boolean {
+  return a.x < b.x + b.w && b.x < a.x + a.w && a.y < b.y + b.h && b.y < a.y + a.h;
+}

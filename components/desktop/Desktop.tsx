@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useReducer } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { DesktopIcon } from "@/components/chrome/DesktopIcon";
 import { DocGlyph, FolderGlyph } from "@/components/chrome/glyphs";
 import { MenuBar } from "@/components/chrome/MenuBar";
@@ -13,6 +13,7 @@ import { WindowContentBoundary } from "@/components/windows/WindowContentBoundar
 import { projects } from "@/content/projects";
 import { site } from "@/content/site";
 import { desktopReducer, initialDesktopState } from "./desktopReducer";
+import { useMarquee } from "./useMarquee";
 import { useIsMobile } from "./useIsMobile";
 import type { Size, Viewport, WindowKind, WindowState } from "./types";
 
@@ -29,6 +30,9 @@ function viewport(): Viewport {
 export function Desktop() {
   const [state, dispatch] = useReducer(desktopReducer, undefined, initialDesktopState);
   const isMobile = useIsMobile();
+  const [iconEls] = useState(() => new Map<string, HTMLButtonElement>());
+  const { selected, marqueeRef, onBackgroundPointerDown, selectOnly } =
+    useMarquee(!isMobile, iconEls);
 
   // Keep every window reachable when the browser window changes size.
   useEffect(() => {
@@ -60,8 +64,16 @@ export function Desktop() {
 
   const focusedId = state.order.at(-1);
 
+  const registerIcon = (id: string) => (el: HTMLButtonElement | null) => {
+    if (el) iconEls.set(id, el);
+    else iconEls.delete(id);
+  };
+
   return (
-    <div className="fixed inset-0 overflow-hidden">
+    <div
+      className="fixed inset-0 overflow-hidden"
+      onPointerDown={onBackgroundPointerDown}
+    >
       <h1 className="sr-only">{site.name}</h1>
       <Sky />
       <MenuBar
@@ -80,15 +92,32 @@ export function Desktop() {
             key={project.id}
             label={project.title}
             glyph={<FolderGlyph />}
-            onOpen={() => open("project", project.id)}
+            selected={selected.has(project.id)}
+            iconRef={registerIcon(project.id)}
+            onOpen={() => {
+              selectOnly(project.id);
+              open("project", project.id);
+            }}
           />
         ))}
         <DesktopIcon
           label={site.welcome.title}
           glyph={<DocGlyph />}
-          onOpen={() => open("welcome")}
+          selected={selected.has("welcome")}
+          iconRef={registerIcon("welcome")}
+          onOpen={() => {
+            selectOnly("welcome");
+            open("welcome");
+          }}
         />
       </div>
+      {/* Rubber-band rectangle: painted above icons (DOM order), below
+          windows (their explicit z-index); driven by useMarquee. */}
+      <div
+        ref={marqueeRef}
+        aria-hidden
+        className="pointer-events-none fixed left-0 top-0 hidden border border-select bg-select/20"
+      />
       {state.order.map((id, index) => {
         const win = state.windows[id];
         return (

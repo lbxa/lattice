@@ -8,6 +8,8 @@ import {
   TITLE_BAR_H,
   clampRect,
   cascadeRect,
+  dragRect,
+  rectsIntersect,
   windowId,
 } from "./geometry";
 import { desktopReducer, initialDesktopState } from "./desktopReducer";
@@ -152,5 +154,26 @@ describe("desktopReducer", () => {
     const r = rectOf(s, "project:aurora");
     expect(r.x).toBeLessThanOrEqual(small.width - EDGE_KEEP);
     expect(r.y).toBeGreaterThanOrEqual(MENU_BAR_H);
+  });
+});
+
+describe("dragRect", () => {
+  test("normalizes drags in any direction", () => {
+    expect(dragRect(10, 20, 110, 220)).toEqual({ x: 10, y: 20, w: 100, h: 200 });
+    expect(dragRect(110, 220, 10, 20)).toEqual({ x: 10, y: 20, w: 100, h: 200 });
+    expect(dragRect(110, 20, 10, 220)).toEqual({ x: 10, y: 20, w: 100, h: 200 });
+  });
+});
+
+describe("rectsIntersect", () => {
+  const a = { x: 0, y: 0, w: 100, h: 100 };
+  test("overlapping rects intersect", () => {
+    expect(rectsIntersect(a, { x: 50, y: 50, w: 100, h: 100 })).toBe(true);
+    expect(rectsIntersect(a, { x: -10, y: -10, w: 20, h: 20 })).toBe(true);
+  });
+  test("disjoint and edge-touching rects do not intersect", () => {
+    expect(rectsIntersect(a, { x: 200, y: 0, w: 10, h: 10 })).toBe(false);
+    expect(rectsIntersect(a, { x: 100, y: 0, w: 10, h: 10 })).toBe(false);
+    expect(rectsIntersect(a, { x: 0, y: 100, w: 10, h: 10 })).toBe(false);
   });
 });
