@@ -86,12 +86,21 @@ body {
 .sky-clouds-near {
   opacity: 0.8;
   animation-duration: 80s;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 90' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Cpath fill='%23fff' d='M17 40h12v3h-12zM14 43h21v3h-21zM11 46h27v3h-27zM8 49h30v3h-30zM78 24h12v3h-12zM73 27h22v3h-22zM69 30h30v3h-30zM66 33h36v3h-36zM126 48h10v3h-10zM122 51h18v3h-18zM118 54h26v3h-26z'/%3E%3C/svg%3E");
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 90' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Cpath fill='%23fff' d='M17 36h12v3h-12zM14 39h21v3h-21zM11 42h27v3h-27zM8 45h30v3h-30zM78 24h12v3h-12zM73 27h22v3h-22zM69 30h30v3h-30zM66 33h36v3h-36zM126 44h10v3h-10zM122 47h18v3h-18zM118 50h26v3h-26z'/%3E%3C/svg%3E");
 }
 
 @keyframes sky-drift {
   from { transform: translate3d(0, 0, 0); }
   to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Static hill foreground (a Bliss homage): smooth vector crest with the
+   photo's sunlit-to-shadow greens and a hazy ridge at the right horizon,
+   painted above the drifting cloud layers so clouds slide behind the
+   crest. Never repaints. */
+.sky-hill {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1600 900' preserveAspectRatio='none'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23a3d75c'/%3E%3Cstop offset='0.3' stop-color='%235aab30'/%3E%3Cstop offset='0.7' stop-color='%2338821f'/%3E%3Cstop offset='1' stop-color='%23265f15'/%3E%3C/linearGradient%3E%3CradialGradient id='h' cx='0.28' cy='0.12' r='0.55'%3E%3Cstop offset='0' stop-color='%23d9f09e' stop-opacity='0.55'/%3E%3Cstop offset='1' stop-color='%23d9f09e' stop-opacity='0'/%3E%3C/radialGradient%3E%3ClinearGradient id='s' x1='0' y1='0' x2='0' y2='1'%3E%3Cstop offset='0' stop-color='%23143f0c' stop-opacity='0'/%3E%3Cstop offset='1' stop-color='%23143f0c' stop-opacity='0.5'/%3E%3C/linearGradient%3E%3C/defs%3E%3Cpath fill='%238fa6c6' opacity='0.85' d='M1060 700C1150 640 1240 622 1330 630C1430 639 1520 652 1600 656V740H1060z'/%3E%3Cpath fill='url(%23g)' d='M0 560C140 500 260 470 420 478C600 488 760 540 980 590C1180 632 1400 660 1600 668V900H0z'/%3E%3Cpath fill='url(%23h)' d='M0 560C140 500 260 470 420 478C600 488 760 540 980 590C1180 632 1400 660 1600 668V900H0z'/%3E%3Crect fill='url(%23s)' y='700' width='1600' height='200'/%3E%3Cg fill='%23e9dc55' opacity='0.7'%3E%3Ccircle cx='180' cy='800' r='4'/%3E%3Ccircle cx='420' cy='840' r='3'/%3E%3Ccircle cx='560' cy='870' r='3'/%3E%3Ccircle cx='700' cy='790' r='3'/%3E%3Ccircle cx='920' cy='850' r='4'/%3E%3Ccircle cx='1180' cy='810' r='3'/%3E%3Ccircle cx='1420' cy='860' r='4'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100%;
 }
 
 /* Faint ordered-dither grain over the whole sky (the "hybrid" retro look). */

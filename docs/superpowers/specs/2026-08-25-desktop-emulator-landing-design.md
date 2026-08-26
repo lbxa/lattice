@@ -141,7 +141,11 @@ mismatch).
    SVG data URIs, blocky slab-stacked shapes on a 160×90 grid, crispEdges),
    looping `translateX(0 → -50%)` at ~80s and ~140s for clearly visible
    parallax drift. Transform-only → GPU-composited.
-3. Dither overlay: ~150-byte base64 Bayer tile, repeated, ~6% opacity,
+3. Static hill foreground (Bliss homage): smooth vector crest with
+   sunlit-to-shadow green gradients and a hazy ridge at the right horizon
+   (inline SVG), painted above the cloud layers so clouds drift behind the
+   crest. Never repaints.
+4. Dither overlay: ~150-byte base64 Bayer tile, repeated, ~6% opacity,
    `mix-blend-mode: overlay`, static.
 
 Honors `prefers-reduced-motion` (drift pauses). The component is the swap
