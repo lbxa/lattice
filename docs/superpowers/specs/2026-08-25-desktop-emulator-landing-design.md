@@ -137,9 +137,10 @@ mismatch).
 `<Sky />`, fixed full-viewport, three layers, all CSS:
 
 1. Base vertical gradient, deep blue → pale horizon.
-2. Two cloud layers: 200%-wide divs of soft stacked radial-gradients, each
-   holding two copies of the same texture, looping `translateX(0 → -50%)` at
-   ~180s and ~300s for parallax drift. Transform-only → GPU-composited.
+2. Two cloud layers: 200%-wide divs tiling pixel-art cloud sprites (inline
+   SVG data URIs, blocky slab-stacked shapes on a 160×90 grid, crispEdges),
+   looping `translateX(0 → -50%)` at ~80s and ~140s for clearly visible
+   parallax drift. Transform-only → GPU-composited.
 3. Dither overlay: ~150-byte base64 Bayer tile, repeated, ~6% opacity,
    `mix-blend-mode: overlay`, static.
 

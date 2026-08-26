@@ -78,23 +78,15 @@ body {
 }
 
 .sky-clouds-far {
-  opacity: 0.5;
-  animation-duration: 300s;
-  background-image:
-    radial-gradient(ellipse 20% 9% at 15% 24%, rgba(255, 255, 255, 0.9), transparent 70%),
-    radial-gradient(ellipse 16% 7% at 38% 14%, rgba(255, 255, 255, 0.7), transparent 70%),
-    radial-gradient(ellipse 24% 8% at 64% 30%, rgba(255, 255, 255, 0.8), transparent 70%),
-    radial-gradient(ellipse 14% 6% at 88% 18%, rgba(255, 255, 255, 0.65), transparent 70%);
+  opacity: 0.55;
+  animation-duration: 140s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 90' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Cpath fill='%23fff' d='M20 10h8v2h-8zM18 12h12v2h-12zM16 14h16v2h-16zM64 24h12v2h-12zM61 26h18v2h-18zM58 28h24v2h-24zM108 8h8v2h-8zM106 10h12v2h-12zM104 12h16v2h-16zM136 32h8v2h-8zM134 34h12v2h-12zM132 36h16v2h-16z'/%3E%3C/svg%3E");
 }
 
 .sky-clouds-near {
-  opacity: 0.65;
-  animation-duration: 180s;
-  background-image:
-    radial-gradient(ellipse 26% 12% at 20% 55%, rgba(255, 255, 255, 0.95), transparent 70%),
-    radial-gradient(ellipse 18% 9% at 52% 42%, rgba(255, 255, 255, 0.75), transparent 70%),
-    radial-gradient(ellipse 28% 11% at 76% 60%, rgba(255, 255, 255, 0.85), transparent 70%),
-    radial-gradient(ellipse 12% 6% at 91% 48%, rgba(255, 255, 255, 0.7), transparent 70%);
+  opacity: 0.8;
+  animation-duration: 80s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 160 90' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Cpath fill='%23fff' d='M17 40h12v3h-12zM14 43h21v3h-21zM11 46h27v3h-27zM8 49h30v3h-30zM78 24h12v3h-12zM73 27h22v3h-22zM69 30h30v3h-30zM66 33h36v3h-36zM126 48h10v3h-10zM122 51h18v3h-18zM118 54h26v3h-26z'/%3E%3C/svg%3E");
 }
 
 @keyframes sky-drift {
