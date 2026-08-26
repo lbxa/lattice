@@ -9,9 +9,9 @@ type WelcomeWindowProps = {
 export function WelcomeWindow({ onBrowse, onAbout }: WelcomeWindowProps) {
   return (
     <div className="flex flex-col gap-3 p-4 font-sans text-sm leading-relaxed">
-      <h1 className="border-b border-outline/20 pb-2 font-pixel text-xl">
+      <h2 className="border-b border-outline/20 pb-2 font-pixel text-xl">
         {site.welcome.heading}
-      </h1>
+      </h2>
       {site.welcome.paragraphs.map((p) => (
         <p key={p}>{p}</p>
       ))}

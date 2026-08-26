@@ -6,7 +6,7 @@ export function AboutWindow() {
     <div className="flex flex-col gap-3 p-4 font-sans text-sm leading-relaxed">
       <header className="flex items-center gap-2 border-b border-outline/20 pb-2">
         <MarkGlyph />
-        <h1 className="font-pixel text-xl">{site.name}</h1>
+        <h2 className="font-pixel text-xl">{site.name}</h2>
       </header>
       {site.about.paragraphs.map((p) => (
         <p key={p}>{p}</p>

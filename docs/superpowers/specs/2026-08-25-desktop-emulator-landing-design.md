@@ -88,7 +88,7 @@ Actions:
 - `CLOSE`, `CLOSE_ALL`
 - `FOCUS` — moves id to end of `order`; z-index derives from order position.
 - `SET_RECT` — committed once per gesture, clamped (title bar must always
-  remain reachable; per-window min sizes).
+  remain reachable; global min size (240×120)).
 - `TOGGLE_COLLAPSE` — window-shade: only the title bar renders.
 - `CLEAN_UP` — re-cascades all open windows.
 
@@ -170,7 +170,8 @@ links as `RetroButton`s. Welcome/About copy lives in `content/site.ts`.
 - Icons in a top-aligned grid with larger tap targets; menu bar shrinks to
   site mark + clock.
 - Windows render full-screen (`fixed`, below menu bar), stacked by the same
-  z-order; close box and File menu still work.
+  z-order; the File and View menus are hidden below 640px (mark menu + clock
+  remain), so windows close via the title-bar close box.
 - Welcome window still auto-opens.
 
 ## Performance budget

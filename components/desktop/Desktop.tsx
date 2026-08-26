@@ -62,6 +62,7 @@ export function Desktop() {
 
   return (
     <div className="fixed inset-0 overflow-hidden">
+      <h1 className="sr-only">{site.name}</h1>
       <Sky />
       <MenuBar
         siteName={site.name}

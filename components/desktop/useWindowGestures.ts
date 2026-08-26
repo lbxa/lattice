@@ -8,7 +8,6 @@ export type WindowGestureArgs = {
   id: string;
   nodeRef: RefObject<HTMLElement | null>;
   placement: Placement;
-  collapsed: boolean;
   enabled: boolean;
   dispatch: DesktopDispatch;
 };
@@ -38,7 +37,6 @@ export function useWindowGestures({
   id,
   nodeRef,
   placement,
-  collapsed,
   enabled,
   dispatch,
 }: WindowGestureArgs): WindowGestures {
@@ -84,6 +82,20 @@ export function useWindowGestures({
     const target = e.currentTarget;
     target.setPointerCapture(e.pointerId);
 
+    const paintFrame = () => {
+      if (!normalized) {
+        normalized = true;
+        // Normalize CSS-centered windows to absolute coordinates (same
+        // pixels, different mechanism) so the transform below is the
+        // only positioner. Deferred to the first frame so a motionless
+        // click never touches the DOM or converts the placement mode.
+        node.style.left = "0px";
+        node.style.top = "0px";
+        node.style.margin = "0";
+        node.style.transform = `translate3d(${start.x}px, ${start.y}px, 0)`;
+      }
+      onFrame(dx, dy, start);
+    };
     const onMove = (ev: globalThis.PointerEvent) => {
       dx = ev.clientX - originX;
       dy = ev.clientY - originY;
@@ -94,18 +106,7 @@ export function useWindowGestures({
       if (raf === 0) {
         raf = requestAnimationFrame(() => {
           raf = 0;
-          if (!normalized) {
-            normalized = true;
-            // Normalize CSS-centered windows to absolute coordinates (same
-            // pixels, different mechanism) so the transform below is the
-            // only positioner. Deferred to the first frame so a motionless
-            // click never touches the DOM or converts the placement mode.
-            node.style.left = "0px";
-            node.style.top = "0px";
-            node.style.margin = "0";
-            node.style.transform = `translate3d(${start.x}px, ${start.y}px, 0)`;
-          }
-          onFrame(dx, dy, start);
+          paintFrame();
         });
       }
     };
@@ -115,7 +116,15 @@ export function useWindowGestures({
       target.removeEventListener("pointerup", finish);
       target.removeEventListener("pointercancel", finish);
       active.current = false;
-      if (moved) onEnd(dx, dy, start);
+      if (moved) {
+        // Paint the final sub-frame delta synchronously before committing:
+        // without this, a release between rAF ticks leaves the node at the
+        // last painted frame while SET_RECT commits the true final rect, and
+        // if that rect happens to equal the previously stored one, React
+        // skips the DOM write entirely, stranding the node mid-drag.
+        paintFrame();
+        onEnd(dx, dy, start);
+      }
     };
     target.addEventListener("pointermove", onMove);
     target.addEventListener("pointerup", finish);
@@ -170,11 +179,6 @@ export function useWindowGestures({
       },
     );
   };
-
-  // `collapsed` is intentionally unused beyond logicalSize: the resize grip
-  // is not rendered while collapsed, and drags of collapsed windows commit
-  // the stored (expanded) size via logicalSize.
-  void collapsed;
 
   return { onTitlePointerDown, onGripPointerDown };
 }

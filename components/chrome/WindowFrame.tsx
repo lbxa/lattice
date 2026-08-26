@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, type CSSProperties, type ReactNode } from "react";
+import { MENU_BAR_H } from "@/components/desktop/geometry";
 import { useWindowGestures } from "@/components/desktop/useWindowGestures";
 import type { DesktopDispatch, WindowState } from "@/components/desktop/types";
 import { TitleBar } from "./TitleBar";
@@ -29,18 +30,23 @@ export function WindowFrame({
     id: win.id,
     nodeRef,
     placement: win.placement,
-    collapsed: win.collapsed,
     enabled: gesturesEnabled,
     dispatch,
   });
+
+  // Below the 640px breakpoint gestures (and with them the collapse widget)
+  // are hidden, so a window collapsed on desktop before the viewport shrank
+  // must render expanded — otherwise it's stuck as full-screen empty chrome
+  // with no control able to restore it.
+  const effectiveCollapsed = win.collapsed && gesturesEnabled;
 
   const style: CSSProperties =
     win.placement.mode === "centered"
       ? {
           left: "50%",
-          top: "42%",
+          top: `max(42%, ${MENU_BAR_H + win.placement.size.h / 2}px)`,
           width: win.placement.size.w,
-          height: win.collapsed ? undefined : win.placement.size.h,
+          height: effectiveCollapsed ? undefined : win.placement.size.h,
           marginLeft: -win.placement.size.w / 2,
           marginTop: -win.placement.size.h / 2,
           zIndex,
@@ -48,7 +54,7 @@ export function WindowFrame({
       : {
           transform: `translate3d(${win.placement.rect.x}px, ${win.placement.rect.y}px, 0)`,
           width: win.placement.rect.w,
-          height: win.collapsed ? undefined : win.placement.rect.h,
+          height: effectiveCollapsed ? undefined : win.placement.rect.h,
           zIndex,
         };
 
@@ -69,7 +75,7 @@ export function WindowFrame({
       <TitleBar
         title={title}
         focused={focused}
-        collapsed={win.collapsed}
+        collapsed={effectiveCollapsed}
         onClose={() => dispatch({ type: "CLOSE", id: win.id })}
         onToggleCollapse={() => dispatch({ type: "TOGGLE_COLLAPSE", id: win.id })}
         onPointerDown={gestures.onTitlePointerDown}
@@ -79,14 +85,16 @@ export function WindowFrame({
             : undefined
         }
       />
-      {!win.collapsed && (
+      {!effectiveCollapsed && (
         <div className="window-body retro-scroll relative min-h-0 flex-1 overflow-y-auto bg-white">
           {children}
         </div>
       )}
-      {!win.collapsed && gesturesEnabled && (
+      {!effectiveCollapsed && gesturesEnabled && (
         <button
           type="button"
+          tabIndex={-1}
+          aria-hidden
           aria-label="Resize window"
           onPointerDown={gestures.onGripPointerDown}
           className="absolute bottom-0 right-0 size-4 cursor-nwse-resize touch-none border-l border-t border-outline bg-chrome bevel-out"
