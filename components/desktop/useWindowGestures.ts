@@ -22,6 +22,13 @@ function viewport(): Viewport {
   return { width: window.innerWidth, height: window.innerHeight };
 }
 
+// Click-vs-drag slop: pointer coordinates can jitter by a pixel or two from
+// event coalescing/rounding even on a stationary click. Requiring more than
+// this before treating the gesture as a real drag keeps a genuine click from
+// converting a centered window to rect placement, without adding any
+// perceptible delay to intentional drags.
+const MOVE_SLOP = 2;
+
 /**
  * Drag/resize write `transform`/size straight to the DOM node each animation
  * frame (zero React renders), then commit ONE `SET_RECT` on release. React
@@ -62,13 +69,17 @@ export function useWindowGestures({
     let dx = 0;
     let dy = 0;
     let raf = 0;
-
-    // Normalize CSS-centered windows to absolute coordinates (same pixels,
-    // different mechanism) so the transform below is the only positioner.
-    node.style.left = "0px";
-    node.style.top = "0px";
-    node.style.margin = "0";
-    node.style.transform = `translate3d(${start.x}px, ${start.y}px, 0)`;
+    let normalized = false;
+    // Real movement (past click slop) gates BOTH the DOM normalization and
+    // the final commit — not just the commit. If normalization ran on a
+    // sub-slop jitter but the commit didn't, the node would be left with a
+    // manual `transform` that React's centered-mode style never clears (it
+    // only sets `left`/`top`/`marginLeft`/`marginTop`), corrupting position
+    // on the next unrelated re-render. So below slop, nothing touches the
+    // DOM at all; a fast real drag still commits regardless of whether a
+    // paint happened to occur before release, because `moved` flips
+    // synchronously in `onMove`, independent of the rAF-deferred `normalized`.
+    let moved = false;
 
     const target = e.currentTarget;
     target.setPointerCapture(e.pointerId);
@@ -76,9 +87,24 @@ export function useWindowGestures({
     const onMove = (ev: globalThis.PointerEvent) => {
       dx = ev.clientX - originX;
       dy = ev.clientY - originY;
+      if (!moved && (Math.abs(dx) > MOVE_SLOP || Math.abs(dy) > MOVE_SLOP)) {
+        moved = true;
+      }
+      if (!moved) return;
       if (raf === 0) {
         raf = requestAnimationFrame(() => {
           raf = 0;
+          if (!normalized) {
+            normalized = true;
+            // Normalize CSS-centered windows to absolute coordinates (same
+            // pixels, different mechanism) so the transform below is the
+            // only positioner. Deferred to the first frame so a motionless
+            // click never touches the DOM or converts the placement mode.
+            node.style.left = "0px";
+            node.style.top = "0px";
+            node.style.margin = "0";
+            node.style.transform = `translate3d(${start.x}px, ${start.y}px, 0)`;
+          }
           onFrame(dx, dy, start);
         });
       }
@@ -89,7 +115,7 @@ export function useWindowGestures({
       target.removeEventListener("pointerup", finish);
       target.removeEventListener("pointercancel", finish);
       active.current = false;
-      onEnd(dx, dy, start);
+      if (moved) onEnd(dx, dy, start);
     };
     target.addEventListener("pointermove", onMove);
     target.addEventListener("pointerup", finish);
@@ -121,7 +147,6 @@ export function useWindowGestures({
   };
 
   const onGripPointerDown = (e: ReactPointerEvent<HTMLElement>) => {
-    e.stopPropagation(); // don't let the frame's FOCUS handler swallow it twice
     begin(
       e,
       (dx, dy, start) => {
