@@ -6,9 +6,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Status
 
-`lattice` is an unmodified `create-next-app` scaffold (one route, one layout, no
-app code of its own yet). There is no domain architecture to learn — the notes
-below cover the toolchain, which differs from the defaults you may assume.
+`lattice` is a retro desktop landing page: a single route that renders a
+window-manager desktop, not a scaffold. Compositor state (window placement,
+focus, drag/resize gestures) lives in `components/desktop/` as a pure reducer
+plus ref-based pointer gestures. Chrome (window frames, title bars, menu bar,
+desktop icons, pixel glyphs) lives in `components/chrome/`, themed entirely via
+`@theme` tokens in [app/globals.css](app/globals.css) — no JS style config.
+Portfolio content (the project list shown as desktop folders) lives in
+[content/projects.ts](content/projects.ts). The notes below cover the
+toolchain, which differs from the defaults you may assume.
 
 ## Commands
 
@@ -24,12 +30,21 @@ bun run lint         # eslint, flat config auto-discovered from eslint.config.mj
 bun run typecheck    # tsc --noEmit
 bun run verify       # lint + typecheck (what the Stop hook runs)
 bun run verify:full  # verify + production build
+bun run test         # bun's built-in runner; covers the pure compositor logic
+bun run deploy       # build + deploy the static export to Cloudflare Workers
 ```
+
+The site is a fully static export (`output: "export"` in next.config.ts →
+`out/`), deployed to Cloudflare Workers Static Assets via
+[wrangler.jsonc](wrangler.jsonc); wrangler runs through `bunx` (no local
+dependency — authenticate once with `bunx wrangler login`, or set
+`CLOUDFLARE_API_TOKEN`/`CLOUDFLARE_ACCOUNT_ID` in CI). `next/image` therefore
+runs `unoptimized` — ship pre-sized project images.
 
 `scripts/setup.sh` provisions a fresh checkout or worktree: `bun install`, plus a
 build to generate the route types described below.
 
-No test framework is configured. If you add one, add its script here.
+Tests use Bun's built-in runner (`bun test`); pure logic only — UI is verified in the browser.
 
 ## Toolchain notes
 

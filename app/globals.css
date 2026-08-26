@@ -1,26 +1,143 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --chrome: #e8e5de;
+  --chrome-dark: #d4d0c8;
+  --chrome-ink: #1a1815;
+  --chrome-dim: #8a8578;
+  --bevel-light: #ffffff;
+  --bevel-dark: #a8a49a;
+  --outline: #26231e;
+  --select: #2f5ec4;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-chrome: var(--chrome);
+  --color-chrome-dark: var(--chrome-dark);
+  --color-chrome-ink: var(--chrome-ink);
+  --color-chrome-dim: var(--chrome-dim);
+  --color-bevel-light: var(--bevel-light);
+  --color-bevel-dark: var(--bevel-dark);
+  --color-outline: var(--outline);
+  --color-select: var(--select);
+  --font-pixel: var(--font-pixel-chrome), "Courier New", monospace;
+  --font-sans: var(--font-geist-sans), Arial, Helvetica, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Raised chrome (buttons, window frames, menu bar). */
+@utility bevel-out {
+  box-shadow:
+    inset 1px 1px 0 var(--bevel-light),
+    inset -1px -1px 0 var(--bevel-dark);
+}
+
+/* Sunken chrome (pressed buttons, wells). */
+@utility bevel-in {
+  box-shadow:
+    inset 1px 1px 0 var(--bevel-dark),
+    inset -1px -1px 0 var(--bevel-light);
+}
+
+/* Focused title bar texture. */
+@utility pinstripes {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 2px,
+    color-mix(in srgb, var(--chrome-ink) 12%, transparent) 2px,
+    color-mix(in srgb, var(--chrome-ink) 12%, transparent) 3px
+  );
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
+  background: #cfe4f6;
+  color: var(--chrome-ink);
+  overflow: hidden; /* the desktop IS the viewport; windows scroll internally */
+}
+
+/* --- Sky ---------------------------------------------------------------- */
+
+.sky-base {
+  background: linear-gradient(
+    to bottom,
+    #2557b8 0%,
+    #3f7ad2 30%,
+    #7db2e8 65%,
+    #cfe4f6 100%
+  );
+}
+
+.sky-clouds {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 200%;
+  background-repeat: repeat-x;
+  background-size: 50% 100%;
+  animation: sky-drift linear infinite;
+}
+
+.sky-clouds-far {
+  opacity: 0.55;
+  animation-duration: 140s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 270' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Cdefs%3E%3Cpath id='f0' d='M50 48V42h1v-2h2v-1h5v-2h1v-1h2v-1h8v-1h3v-1h5v1h2v1h2v1h5v1h2v1h2v2h3v1h1v1h1v3h1V48z'/%3E%3Cpath id='f1' d='M177 90V81h1v-2h1v-1h2v-1h7v-1h1v-2h1v-1h1v-1h2v-1h2v-1h8v1h2v-1h2v-1h2v-1h9v1h3v1h1v1h1v1h1v1h1v-1h6v1h2v1h2v1h1v1h1v1h1v1h3v1h1v1h1v1h1v1h1v8h1V90z'/%3E%3Cpath id='f2' d='M314 42V36h1v-2h2v-1h5v-2h1v-1h2v-1h8v-1h3v-1h5v1h2v1h2v1h5v1h2v1h2v2h3v1h1v1h1v3h1V42z'/%3E%3Cpath id='f3' d='M398 114V108h1v-2h2v-1h5v-2h1v-1h2v-1h8v-1h3v-1h5v1h2v1h2v1h5v1h2v1h2v2h3v1h1v1h1v3h1V114z'/%3E%3C/defs%3E%3Cuse href='%23f0' y='6' fill='%23b9cbe6'/%3E%3Cuse href='%23f0' y='3' fill='%23d7e3f4'/%3E%3Cuse href='%23f0' y='0' fill='%23ffffff'/%3E%3Cuse href='%23f1' y='6' fill='%23b9cbe6'/%3E%3Cuse href='%23f1' y='3' fill='%23d7e3f4'/%3E%3Cuse href='%23f1' y='0' fill='%23ffffff'/%3E%3Cuse href='%23f2' y='6' fill='%23b9cbe6'/%3E%3Cuse href='%23f2' y='3' fill='%23d7e3f4'/%3E%3Cuse href='%23f2' y='0' fill='%23ffffff'/%3E%3Cuse href='%23f3' y='6' fill='%23b9cbe6'/%3E%3Cuse href='%23f3' y='3' fill='%23d7e3f4'/%3E%3Cuse href='%23f3' y='0' fill='%23ffffff'/%3E%3C/svg%3E");
+}
+
+.sky-clouds-near {
+  opacity: 0.8;
+  animation-duration: 80s;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 270' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Cdefs%3E%3Cpath id='n0' d='M27 144V134h1v-2h1v-1h1v-1h1v-1h1v-1h3v-1h5v1h1v-1h1v-2h1v-1h1v-1h1v-1h2v-1h1v-1h3v-1h9v1h3v-1h2v-1h2v-1h3v-1h7v1h3v1h2v1h2v1h1v1h1v1h10v1h3v1h1v1h1v1h1v1h1v1h1v1h3v1h2v1h1v1h1v1h1v2h1v9h1V144z'/%3E%3Cpath id='n1' d='M202 108V95h1v-1h1v-2h1v-1h1v-1h2v-1h2v-1h9v-1h1v-2h1v-1h1v-1h1v-1h1v-1h2v-1h2v-1h3v-1h10v1h4v-1h1v-1h2v-1h3v-1h13v1h2v1h2v1h2v1h1v1h1v1h1v1h3v-1h6v1h4v1h2v1h1v1h1v1h1v1h1v1h1v1h1v1h4v1h2v1h1v1h1v1h1v2h1v2h1V108z'/%3E%3Cpath id='n2' d='M357 159V149h1v-1h1v-1h1v-1h1v-1h4v-1h1v1h3v-1h1v-2h1v-1h1v-1h2v-1h1v-1h4v-1h5v1h4v-1h2v-1h2v-1h9v1h3v1h2v1h1v1h1v1h9v1h2v1h1v1h2v2h1v1h3v1h2v1h1v1h1v2h1v8h1V159z'/%3E%3C/defs%3E%3Cuse href='%23n0' y='6' fill='%23b9cbe6'/%3E%3Cuse href='%23n0' y='3' fill='%23d7e3f4'/%3E%3Cuse href='%23n0' y='0' fill='%23ffffff'/%3E%3Cuse href='%23n1' y='6' fill='%23b9cbe6'/%3E%3Cuse href='%23n1' y='3' fill='%23d7e3f4'/%3E%3Cuse href='%23n1' y='0' fill='%23ffffff'/%3E%3Cuse href='%23n2' y='6' fill='%23b9cbe6'/%3E%3Cuse href='%23n2' y='3' fill='%23d7e3f4'/%3E%3Cuse href='%23n2' y='0' fill='%23ffffff'/%3E%3C/svg%3E");
+}
+
+@keyframes sky-drift {
+  from { transform: translate3d(0, 0, 0); }
+  to { transform: translate3d(-50%, 0, 0); }
+}
+
+/* Static hill foreground (a Bliss homage): fine-grained pixel art — the
+   smooth crest curve sampled onto a 480x270 grid (~3px steps) and
+   posterized into rim-lit green bands, with a hazy stepped ridge at the
+   right horizon. Painted above the drifting cloud layers so clouds slide
+   behind the crest. Never repaints. */
+.sky-hill {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 480 270' preserveAspectRatio='none' shape-rendering='crispEdges'%3E%3Cdefs%3E%3Cpath id='p' d='M0 168h1v-1h2v-1h2v-1h3v-1h2v-1h3v-1h2v-1h3v-1h3v-1h3v-1h2v-1h3v-1h3v-1h4v-1h3v-1h3v-1h4v-1h4v-1h4v-1h4v-1h5v-1h5v-1h7v-1h8v-1h11v-1h33v1h13v1h9v1h8v1h6v1h6v1h6v1h5v1h6v1h4v1h5v1h5v1h4v1h4v1h5v1h4v1h4v1h4v1h4v1h4v1h5v1h4v1h4v1h4v1h4v1h4v1h4v1h4v1h4v1h4v1h4v1h5v1h4v1h4v1h5v1h5v1h5v1h5v1h5v1h6v1h5v1h6v1h6v1h6v1h6v1h6v1h7v1h7v1h8v1h7v1h8v1h9v1h9v1h10v1h12v1h12v1h15v1h19V270H0z'/%3E%3Cpath id='r' d='M318 209h2v-1h1v-1h2v-1h2v-1h1v-1h2v-1h2v-1h2v-1h2v-1h2v-1h2v-1h3v-1h2v-1h3v-1h3v-1h3v-1h3v-1h4v-1h5v-1h7v-1h12v-1h7v1h14v1h10v1h9v1h9v1h10v1h9v1h10v1h13v1h6V222H318z'/%3E%3C/defs%3E%3Cuse href='%23r' fill='%2397abc9'/%3E%3Cuse href='%23r' y='3' fill='%238399bb'/%3E%3Cuse href='%23p' fill='%23a9da60'/%3E%3Cuse href='%23p' y='4' fill='%2390cc4d'/%3E%3Cuse href='%23p' y='9' fill='%2379bd3e'/%3E%3Cuse href='%23p' y='15' fill='%2364b034'/%3E%3Cuse href='%23p' y='22' fill='%2353a42c'/%3E%3Cuse href='%23p' y='30' fill='%23459626'/%3E%3Cuse href='%23p' y='40' fill='%23388821'/%3E%3Cuse href='%23p' y='52' fill='%232d781b'/%3E%3Cuse href='%23p' y='66' fill='%23256a16'/%3E%3Cpath fill='%231d5c11' d='M0 254h480v16H0z'/%3E%3Cg fill='%23ecdf58'%3E%3Cpath d='M30 240h1v1h-1z'/%3E%3Cpath d='M78 258h1v1h-1z'/%3E%3Cpath d='M105 265h1v1h-1z'/%3E%3Cpath d='M130 232h1v1h-1z'/%3E%3Cpath d='M168 250h1v1h-1z'/%3E%3Cpath d='M210 262h1v1h-1z'/%3E%3Cpath d='M255 238h1v1h-1z'/%3E%3Cpath d='M300 252h1v1h-1z'/%3E%3Cpath d='M345 264h1v1h-1z'/%3E%3Cpath d='M390 244h1v1h-1z'/%3E%3Cpath d='M430 258h1v1h-1z'/%3E%3Cpath d='M456 236h1v1h-1z'/%3E%3C/g%3E%3C/svg%3E");
+  background-size: 100% 100%;
+}
+
+/* Faint ordered-dither grain over the whole sky (the "hybrid" retro look). */
+.sky-dither {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='4' height='4'%3E%3Cpath d='M0 0h1v1H0zM2 2h1v1H2z' fill='%23000'/%3E%3C/svg%3E");
+  background-size: 4px 4px;
+  opacity: 0.07;
+  mix-blend-mode: overlay;
+  image-rendering: pixelated;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sky-clouds { animation: none; }
+}
+
+/* --- Window body & retro scrollbars ------------------------------------- */
+
+.window-body {
+  border-top: 1px solid var(--bevel-light);
+}
+
+.retro-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: var(--chrome-dark) var(--chrome);
+}
+
+.retro-scroll::-webkit-scrollbar {
+  width: 14px;
+}
+
+.retro-scroll::-webkit-scrollbar-track {
+  background: var(--chrome);
+  border-left: 1px solid var(--outline);
+}
+
+.retro-scroll::-webkit-scrollbar-thumb {
+  background: var(--chrome-dark);
+  border: 1px solid var(--outline);
 }
