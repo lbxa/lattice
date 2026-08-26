@@ -1,6 +1,11 @@
 "use client";
 
-import { useRef, type CSSProperties, type ReactNode } from "react";
+import {
+  useRef,
+  type CSSProperties,
+  type KeyboardEvent as ReactKeyboardEvent,
+  type ReactNode,
+} from "react";
 import { MENU_BAR_H } from "@/components/desktop/geometry";
 import { useWindowGestures } from "@/components/desktop/useWindowGestures";
 import type { DesktopDispatch, WindowState } from "@/components/desktop/types";
@@ -39,6 +44,28 @@ export function WindowFrame({
   // must render expanded — otherwise it's stuck as full-screen empty chrome
   // with no control able to restore it.
   const effectiveCollapsed = win.collapsed && gesturesEnabled;
+
+  // Keyboard resizing from the grip: arrows nudge by 16px (Shift: 64px);
+  // the reducer clamps to min sizes and the viewport like any gesture.
+  const onGripKeyDown = (e: ReactKeyboardEvent) => {
+    const step = e.shiftKey ? 64 : 16;
+    const delta = {
+      ArrowRight: [step, 0],
+      ArrowLeft: [-step, 0],
+      ArrowDown: [0, step],
+      ArrowUp: [0, -step],
+    }[e.key];
+    const node = nodeRef.current;
+    if (!delta || !node) return;
+    e.preventDefault();
+    const r = node.getBoundingClientRect();
+    dispatch({
+      type: "SET_RECT",
+      id: win.id,
+      rect: { x: r.x, y: r.y, w: r.width + delta[0], h: r.height + delta[1] },
+      viewport: { width: window.innerWidth, height: window.innerHeight },
+    });
+  };
 
   const style: CSSProperties =
     win.placement.mode === "centered"
@@ -93,11 +120,10 @@ export function WindowFrame({
       {!effectiveCollapsed && gesturesEnabled && (
         <button
           type="button"
-          tabIndex={-1}
-          aria-hidden
-          aria-label="Resize window"
+          aria-label={`Resize ${title} window (arrow keys, Shift for larger steps)`}
           onPointerDown={gestures.onGripPointerDown}
-          className="absolute bottom-0 right-0 size-4 cursor-nwse-resize touch-none border-l border-t border-outline bg-chrome bevel-out"
+          onKeyDown={onGripKeyDown}
+          className="absolute bottom-0 right-0 size-4 cursor-nwse-resize touch-none border-l border-t border-outline bg-chrome bevel-out focus-visible:outline-2 focus-visible:outline-select"
         />
       )}
     </section>
