@@ -137,10 +137,11 @@ mismatch).
 `<Sky />`, fixed full-viewport, three layers, all CSS:
 
 1. Base vertical gradient, deep blue → pale horizon.
-2. Two cloud layers: 200%-wide divs tiling pixel-art cloud sprites (inline
-   SVG data URIs, blocky slab-stacked shapes on a 160×90 grid, crispEdges),
-   looping `translateX(0 → -50%)` at ~80s and ~140s for clearly visible
-   parallax drift. Transform-only → GPU-composited.
+2. Two cloud layers: 200%-wide divs tiling fine-pixel cumulus sprites
+   (smooth circle-union silhouettes quantized to a 480x270 grid with
+   two-tone shaded undersides, inline SVG, crispEdges), looping
+   `translateX(0 → -50%)` at ~80s and ~140s for clearly visible parallax
+   drift. Transform-only → GPU-composited.
 3. Static hill foreground (Bliss homage): fine-grained pixel art — the
    smooth crest curve sampled onto a 480x270 grid (~3px steps) and
    posterized into rim-lit green bands, hazy stepped ridge at the right
