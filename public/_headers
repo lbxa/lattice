@@ -1,0 +1,16 @@
+# Cloudflare Workers Static Assets header rules.
+# https://developers.cloudflare.com/workers/static-assets/headers/
+# Next copies everything in public/ into out/, which is the asset directory
+# wrangler.jsonc uploads.
+
+# Next's opengraph-image route convention exports to an *extensionless* file
+# (out/opengraph-image). Wrangler infers MIME types from the file extension, so
+# without this rule the card is served with no usable Content-Type and Facebook,
+# LinkedIn, and X all reject it — the link unfurls with no image and no error.
+/opengraph-image
+  Content-Type: image/png
+
+# Keep the workers.dev deployment out of search results so it cannot compete
+# with the canonical custom domain for the same content.
+https://:version.:subdomain.workers.dev/*
+  X-Robots-Tag: noindex

@@ -1,6 +1,9 @@
 import type { Rect, Size, Viewport, WindowKind } from "./types";
 
 export const MENU_BAR_H = 28;
+/** Below Tailwind `sm`. Shared so the pre-hydration boot script and
+ *  useIsMobile can never disagree about what counts as mobile. */
+export const MOBILE_QUERY = "(max-width: 639px)";
 export const TITLE_BAR_H = 24;
 export const MIN_W = 240;
 export const MIN_H = 120;

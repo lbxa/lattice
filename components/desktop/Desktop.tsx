@@ -6,6 +6,14 @@ import { DocGlyph, FolderGlyph } from "@/components/chrome/glyphs";
 import { MenuBar } from "@/components/chrome/MenuBar";
 import { WindowFrame } from "@/components/chrome/WindowFrame";
 import { Sky } from "@/components/sky/Sky";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { AboutWindow } from "@/components/windows/AboutWindow";
 import { ProjectWindow } from "@/components/windows/ProjectWindow";
 import { WelcomeWindow } from "@/components/windows/WelcomeWindow";
@@ -13,9 +21,76 @@ import { WindowContentBoundary } from "@/components/windows/WindowContentBoundar
 import { projects } from "@/content/projects";
 import { site } from "@/content/site";
 import { desktopReducer, initialDesktopState } from "./desktopReducer";
+import { useIconDrag } from "./useIconDrag";
 import { useMarquee } from "./useMarquee";
 import { useIsMobile } from "./useIsMobile";
+import type { ReactNode } from "react";
 import type { Size, Viewport, WindowKind, WindowState } from "./types";
+
+/**
+ * Wraps an icon in its own context menu.
+ *
+ * Actions apply to the whole selection when the right-clicked icon belongs to
+ * it, and to that icon alone otherwise — the same rule useIconDrag uses to
+ * decide what a drag carries, and the one every file manager follows. Acting
+ * only on the clicked icon would silently throw away a batch selection the
+ * user had just made.
+ *
+ * Opening the menu on an unselected icon also reduces the selection to it, so
+ * the highlight on screen always matches what the menu is about to act on.
+ *
+ * `display: contents` on the trigger is load-bearing: the icon button must stay
+ * the direct flex child of the icon column, and it is also the element that
+ * carries `data-icon` and gets pinned by useIconDrag. A trigger with a real box
+ * would sit between them and break both the layout and the drag.
+ */
+function IconContextMenu({
+  iconId,
+  label,
+  selected,
+  onSelectOnly,
+  onOpenIcons,
+  onTidy,
+  tidyDisabled,
+  children,
+}: {
+  iconId: string;
+  label: string;
+  selected: ReadonlySet<string>;
+  onSelectOnly: (id: string) => void;
+  onOpenIcons: (ids: readonly string[]) => void;
+  onTidy: () => void;
+  tidyDisabled: boolean;
+  children: ReactNode;
+}) {
+  const targets = selected.has(iconId) ? [...selected] : [iconId];
+  const many = targets.length > 1;
+
+  return (
+    <ContextMenu
+      onOpenChange={(open) => {
+        if (open && !selected.has(iconId)) onSelectOnly(iconId);
+      }}
+    >
+      <ContextMenuTrigger className="contents">{children}</ContextMenuTrigger>
+      <ContextMenuContent
+        aria-label={many ? `${targets.length} selected items` : `${label} actions`}
+      >
+        <ContextMenuGroup>
+          <ContextMenuItem onClick={() => onOpenIcons(targets)}>
+            {many ? `Open ${targets.length} Items` : "Open"}
+          </ContextMenuItem>
+        </ContextMenuGroup>
+        <ContextMenuSeparator />
+        <ContextMenuGroup>
+          <ContextMenuItem disabled={tidyDisabled} onClick={onTidy}>
+            Tidy Icons
+          </ContextMenuItem>
+        </ContextMenuGroup>
+      </ContextMenuContent>
+    </ContextMenu>
+  );
+}
 
 const SIZES: Record<WindowKind, Size> = {
   welcome: { w: 400, h: 320 },
@@ -33,6 +108,11 @@ export function Desktop() {
   const [iconEls] = useState(() => new Map<string, HTMLButtonElement>());
   const { selected, marqueeRef, onBackgroundPointerDown, selectOnly } =
     useMarquee(!isMobile, iconEls);
+  const { positionOf, onIconPointerDown, isArranged, resetLayout } = useIconDrag(
+    !isMobile,
+    iconEls,
+    selected,
+  );
 
   // Keep every window reachable when the browser window changes size.
   useEffect(() => {
@@ -64,6 +144,22 @@ export function Desktop() {
 
   const focusedId = state.order.at(-1);
 
+  // "welcome" is the one icon that is not a project; everything else on the
+  // desktop maps to a project window.
+  const openIcon = (id: string) =>
+    id === "welcome" ? open("welcome") : open("project", id);
+
+  /**
+   * Each OPEN is a separate dispatch, so the reducer sees the growing window
+   * count and cascades the new windows apart instead of stacking them.
+   */
+  const openIcons = (ids: readonly string[]) => ids.forEach(openIcon);
+
+  const openWelcome = () => {
+    selectOnly("welcome");
+    open("welcome");
+  };
+
   const registerIcon = (id: string) => (el: HTMLButtonElement | null) => {
     if (el) iconEls.set(id, el);
     else iconEls.delete(id);
@@ -75,7 +171,40 @@ export function Desktop() {
       onPointerDown={onBackgroundPointerDown}
     >
       <h1 className="sr-only">{site.name}</h1>
-      <Sky />
+      {/* The trigger wraps only the backdrop, not the whole desktop. Windows
+          and icons paint above it and are not descendants, so right-clicking
+          window text still gets the browser's own copy/paste menu — taking
+          that away to show a desktop menu would be hostile. */}
+      <ContextMenu>
+        <ContextMenuTrigger className="fixed inset-0" aria-label="Desktop">
+          <Sky />
+        </ContextMenuTrigger>
+        <ContextMenuContent aria-label="Desktop actions">
+          <ContextMenuGroup>
+            <ContextMenuItem
+              disabled={state.order.length === 0}
+              onClick={() => dispatch({ type: "CLEAN_UP", viewport: viewport() })}
+            >
+              Clean Up Windows
+            </ContextMenuItem>
+            <ContextMenuItem disabled={!isArranged} onClick={resetLayout}>
+              Tidy Icons
+            </ContextMenuItem>
+          </ContextMenuGroup>
+          <ContextMenuSeparator />
+          <ContextMenuGroup>
+            <ContextMenuItem
+              disabled={state.order.length === 0}
+              onClick={() => dispatch({ type: "CLOSE_ALL" })}
+            >
+              Close All Windows
+            </ContextMenuItem>
+            <ContextMenuItem onClick={() => open("about")}>
+              About this site…
+            </ContextMenuItem>
+          </ContextMenuGroup>
+        </ContextMenuContent>
+      </ContextMenu>
       <MenuBar
         siteName={site.name}
         hasWindows={state.order.length > 0}
@@ -86,30 +215,59 @@ export function Desktop() {
         onCloseAll={() => dispatch({ type: "CLOSE_ALL" })}
         onCleanUp={() => dispatch({ type: "CLEAN_UP", viewport: viewport() })}
       />
-      <div className="absolute bottom-3 right-3 top-10 flex flex-col items-center gap-4 max-sm:relative max-sm:mt-10 max-sm:grid max-sm:grid-cols-3 max-sm:justify-items-center max-sm:px-4">
-        {projects.map((project) => (
-          <DesktopIcon
-            key={project.id}
-            label={project.title}
-            glyph={<FolderGlyph />}
-            selected={selected.has(project.id)}
-            iconRef={registerIcon(project.id)}
-            onOpen={() => {
-              selectOnly(project.id);
-              open("project", project.id);
-            }}
-          />
-        ))}
-        <DesktopIcon
+      {/* Icons are `position: fixed` once dragged (see useIconDrag), so they
+          escape this box entirely; `pointer-events-none` keeps the now-empty
+          container from intercepting marquee drags on the bare desktop. */}
+      <div className="pointer-events-none absolute bottom-3 right-3 top-10 flex flex-col items-center gap-4 max-sm:relative max-sm:mt-10 max-sm:grid max-sm:grid-cols-3 max-sm:justify-items-center max-sm:px-4">
+        {projects.map((project) => {
+          const openProject = () => {
+            selectOnly(project.id);
+            open("project", project.id);
+          };
+          return (
+            <IconContextMenu
+              key={project.id}
+              iconId={project.id}
+              label={project.title}
+              selected={selected}
+              onSelectOnly={selectOnly}
+              onOpenIcons={openIcons}
+              onTidy={resetLayout}
+              tidyDisabled={!isArranged}
+            >
+              <DesktopIcon
+                iconId={project.id}
+                label={project.title}
+                glyph={<FolderGlyph />}
+                selected={selected.has(project.id)}
+                iconRef={registerIcon(project.id)}
+                style={positionOf(project.id)}
+                onPointerDown={onIconPointerDown(project.id)}
+                onOpen={openProject}
+              />
+            </IconContextMenu>
+          );
+        })}
+        <IconContextMenu
+          iconId="welcome"
           label={site.welcome.title}
-          glyph={<DocGlyph />}
-          selected={selected.has("welcome")}
-          iconRef={registerIcon("welcome")}
-          onOpen={() => {
-            selectOnly("welcome");
-            open("welcome");
-          }}
-        />
+          selected={selected}
+          onSelectOnly={selectOnly}
+          onOpenIcons={openIcons}
+          onTidy={resetLayout}
+          tidyDisabled={!isArranged}
+        >
+          <DesktopIcon
+            iconId="welcome"
+            label={site.welcome.title}
+            glyph={<DocGlyph />}
+            selected={selected.has("welcome")}
+            iconRef={registerIcon("welcome")}
+            style={positionOf("welcome")}
+            onPointerDown={onIconPointerDown("welcome")}
+            onOpen={openWelcome}
+          />
+        </IconContextMenu>
       </div>
       {/* Rubber-band rectangle: painted above icons (DOM order), below
           windows (their explicit z-index); driven by useMarquee. */}

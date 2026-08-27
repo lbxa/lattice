@@ -1,18 +1,40 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  type CSSProperties,
+  type PointerEvent as ReactPointerEvent,
+  type ReactNode,
+} from "react";
 
 type DesktopIconProps = {
+  /** Stable id; also the selector the pre-hydration boot stylesheet targets. */
+  iconId: string;
   label: string;
   glyph: ReactNode;
   onOpen: () => void;
   /** Marquee/click selection controlled by the desktop. */
   selected?: boolean;
-  /** Registers the root element for marquee hit-testing. */
+  /** Registers the root element for marquee hit-testing and drag measurement. */
   iconRef?: (el: HTMLButtonElement | null) => void;
+  /** Free-form position once the desktop has been rearranged; see useIconDrag. */
+  style?: CSSProperties;
+  /** Starts a drag. A completed drag swallows the click, so onOpen won't fire. */
+  onPointerDown?: (e: ReactPointerEvent<HTMLElement>) => void;
 };
 
-export function DesktopIcon({ label, glyph, onOpen, selected = false, iconRef }: DesktopIconProps) {
+export function DesktopIcon({
+  iconId,
+  label,
+  glyph,
+  onOpen,
+  selected = false,
+  iconRef,
+  style,
+  onPointerDown,
+}: DesktopIconProps) {
   const [flash, setFlash] = useState(false);
   const timer = useRef<number | null>(null);
 
@@ -41,8 +63,14 @@ export function DesktopIcon({ label, glyph, onOpen, selected = false, iconRef }:
     <button
       type="button"
       ref={iconRef}
+      data-icon={iconId}
       onClick={activate}
-      className="group flex w-20 flex-col items-center gap-1 outline-none"
+      onPointerDown={onPointerDown}
+      style={style}
+      // `select-none` rather than preventDefault on pointerdown: it stops the
+      // label being text-selected mid-drag without suppressing focus or
+      // risking the click that a plain tap depends on.
+      className="group pointer-events-auto flex w-20 select-none flex-col items-center gap-1 outline-none"
     >
       <span
         data-selected={highlighted || undefined}

@@ -6,6 +6,14 @@ import {
   type KeyboardEvent as ReactKeyboardEvent,
   type ReactNode,
 } from "react";
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuGroup,
+  ContextMenuItem,
+  ContextMenuSeparator,
+  ContextMenuTrigger,
+} from "@/components/ui/context-menu";
 import { MENU_BAR_H } from "@/components/desktop/geometry";
 import { useWindowGestures } from "@/components/desktop/useWindowGestures";
 import type { DesktopDispatch, WindowState } from "@/components/desktop/types";
@@ -99,19 +107,56 @@ export function WindowFrame({
           : "shadow-[1px_2px_0_rgba(15,25,46,0.2)]"
       } max-sm:inset-x-0! max-sm:top-7! max-sm:bottom-0! max-sm:m-0! max-sm:h-auto! max-sm:w-auto! max-sm:transform-none! max-sm:rounded-none`}
     >
-      <TitleBar
-        title={title}
-        focused={focused}
-        collapsed={effectiveCollapsed}
-        onClose={() => dispatch({ type: "CLOSE", id: win.id })}
-        onToggleCollapse={() => dispatch({ type: "TOGGLE_COLLAPSE", id: win.id })}
-        onPointerDown={gestures.onTitlePointerDown}
-        onDoubleClick={
-          gesturesEnabled
-            ? () => dispatch({ type: "TOGGLE_COLLAPSE", id: win.id })
-            : undefined
-        }
-      />
+      {/* The window menu hangs off the title bar only, never the body. Real
+          desktops do the same, and it leaves the browser's own selection and
+          copy menu intact over the window's text. `display: contents` keeps
+          the title bar a direct flex child of the frame. */}
+      <ContextMenu>
+        <ContextMenuTrigger className="contents">
+          <TitleBar
+            title={title}
+            focused={focused}
+            collapsed={effectiveCollapsed}
+            onClose={() => dispatch({ type: "CLOSE", id: win.id })}
+            onToggleCollapse={() => dispatch({ type: "TOGGLE_COLLAPSE", id: win.id })}
+            onPointerDown={gestures.onTitlePointerDown}
+            onDoubleClick={
+              gesturesEnabled
+                ? () => dispatch({ type: "TOGGLE_COLLAPSE", id: win.id })
+                : undefined
+            }
+          />
+        </ContextMenuTrigger>
+        <ContextMenuContent aria-label={`${title} window actions`}>
+          <ContextMenuGroup>
+            <ContextMenuItem
+              disabled={!gesturesEnabled}
+              onClick={() => dispatch({ type: "TOGGLE_COLLAPSE", id: win.id })}
+            >
+              {effectiveCollapsed ? "Expand" : "Collapse"}
+            </ContextMenuItem>
+            <ContextMenuItem
+              onClick={() =>
+                dispatch({
+                  type: "CLEAN_UP",
+                  viewport: { width: window.innerWidth, height: window.innerHeight },
+                })
+              }
+            >
+              Clean Up Windows
+            </ContextMenuItem>
+          </ContextMenuGroup>
+          <ContextMenuSeparator />
+          <ContextMenuGroup>
+            <ContextMenuItem onClick={() => dispatch({ type: "CLOSE", id: win.id })}>
+              Close Window
+            </ContextMenuItem>
+            <ContextMenuItem onClick={() => dispatch({ type: "CLOSE_ALL" })}>
+              Close All Windows
+            </ContextMenuItem>
+          </ContextMenuGroup>
+        </ContextMenuContent>
+      </ContextMenu>
       {!effectiveCollapsed && (
         <div className="window-body retro-scroll relative min-h-0 flex-1 overflow-y-auto bg-white">
           {children}
