@@ -61,27 +61,39 @@ export function DocGlyph({ className }: GlyphProps) {
   );
 }
 
-/** Site mark for the menu bar: a shaded pixel cloud, 14×10 grid. */
+/**
+ * The Lattice mark: two equal squares offset diagonally and bridged by a
+ * parallelogram that shares each square's facing edge — the lattice cell.
+ *
+ * Rebuilt as geometry rather than traced, because the only surviving copy was a
+ * low-resolution render. Three numbers define it, so correcting the proportions
+ * against the original artwork is a one-line change:
+ *
+ *   side 12 · gap 4 · rise 6   →   56° connector, 50% vertical overlap, 3:2 box
+ *
+ * Stroked in `currentColor` so it inverts to white on its own when the menu-bar
+ * trigger takes the selected state, and inherits window ink everywhere else.
+ */
 export function MarkGlyph({ className }: GlyphProps) {
   return (
     <svg
-      viewBox="0 0 14 10"
-      width="21"
-      height="15"
-      shapeRendering="crispEdges"
+      viewBox="0 0 30 20"
+      width="24"
+      height="16"
+      fill="none"
+      stroke="currentColor"
+      // 1.5 on a 12-unit side ≈ the reference's stroke-to-square ratio. Heavier
+      // reads as a UI icon rather than a logo; lighter breaks up at 16px.
+      strokeWidth="1.5"
       className={className}
       aria-hidden
     >
-      <path d="M4 2h4v2h3v2h2v3H1V6h1V4h2z" fill="#ffffff" />
-      {/* Shaded underside, matching the sky's cumulus sprites. */}
-      <path d="M2 8h10v1H2z" fill="#b9cbe6" />
-      <path
-        d="M4 2h4v2h3v2h2v3H1V6h1V4h2z"
-        fill="none"
-        stroke="#2b241a"
-        strokeWidth="1"
-        strokeLinecap="square"
-      />
+      {/* Lower-left cell. */}
+      <rect x="1" y="7" width="12" height="12" />
+      {/* Upper-right cell. */}
+      <rect x="17" y="1" width="12" height="12" />
+      {/* The bridge: parallel diagonals joining the two facing edges. */}
+      <path d="M13 7 17 1M13 19 17 13" />
     </svg>
   );
 }

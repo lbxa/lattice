@@ -42,3 +42,6 @@ next-env.d.ts
 
 # claude code
 /.claude/worktrees/
+
+# wrangler local state (created by `wrangler dev` and `bun run deploy`)
+.wrangler/

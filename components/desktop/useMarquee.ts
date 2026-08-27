@@ -51,6 +51,15 @@ export function useMarquee(
 
   const onBackgroundPointerDown = (e: ReactPointerEvent<HTMLElement>) => {
     if (!enabled || active.current || e.button !== 0) return;
+    // Reject anything rendered through a React portal — context menus, and any
+    // overlay added later. React dispatches portal events through the React
+    // tree, so a press inside a menu that lives at document.body still reaches
+    // this handler as if it were a press on the bare desktop. Left unguarded,
+    // the marquee below captures the pointer and the menu item never sees its
+    // own pointerup, so the click silently does nothing. DOM containment is
+    // the check that holds for every portal, present and future; matching on
+    // selectors only ever catches the ones already known about.
+    if (!e.currentTarget.contains(e.target as Node)) return;
     // Only the bare desktop starts a marquee — not windows, icons, or menus.
     if ((e.target as HTMLElement).closest("[data-window-id], button, nav, a")) {
       return;

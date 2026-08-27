@@ -2,6 +2,7 @@ import type { Dispatch } from "react";
 
 export type WindowKind = "welcome" | "about" | "project";
 
+export type Point = { x: number; y: number };
 export type Rect = { x: number; y: number; w: number; h: number };
 export type Size = { w: number; h: number };
 export type Viewport = { width: number; height: number };

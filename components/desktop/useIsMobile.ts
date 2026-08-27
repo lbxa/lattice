@@ -1,8 +1,7 @@
 "use client";
 
 import { useSyncExternalStore } from "react";
-
-const QUERY = "(max-width: 639px)"; // below Tailwind `sm`
+import { MOBILE_QUERY as QUERY } from "./geometry";
 
 function subscribe(onChange: () => void) {
   const mql = window.matchMedia(QUERY);
