@@ -80,7 +80,11 @@ export function DesktopIcon({
       </span>
       <span
         data-selected={highlighted || undefined}
-        className="max-w-full truncate rounded-xs bg-white/85 px-1 font-pixel text-[12px] text-chrome-ink group-focus-visible:outline-2 group-focus-visible:outline-select data-selected:bg-select data-selected:text-white"
+        // Two lines, then ellipsis — real project names are rarely one word,
+        // and a desktop that truncates "Gabriella Cardoso" to "Gabriella C..."
+        // reads as broken rather than retro. Wrapping is what every desktop
+        // this borrows from actually did.
+        className="max-w-full rounded-xs bg-white/85 px-1 text-center font-pixel text-[12px] text-chrome-ink break-words line-clamp-2 group-focus-visible:outline-2 group-focus-visible:outline-select data-selected:bg-select data-selected:text-white"
       >
         {label}
       </span>

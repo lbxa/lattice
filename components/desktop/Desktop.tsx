@@ -95,7 +95,11 @@ function IconContextMenu({
 const SIZES: Record<WindowKind, Size> = {
   welcome: { w: 400, h: 320 },
   about: { w: 380, h: 300 },
-  project: { w: 480, h: 380 },
+  // Tall enough to clear a 16:9 hero image and still land on the first
+  // paragraph. Every project in content/projects.ts now opens with one, and at
+  // the old 380 the window filled with picture and the copy began below the
+  // fold — a card you have to scroll before it says anything.
+  project: { w: 480, h: 520 },
 };
 
 function viewport(): Viewport {

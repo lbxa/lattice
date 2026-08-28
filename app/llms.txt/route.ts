@@ -1,5 +1,5 @@
 import { projects } from "@/content/projects";
-import { PROJECTS_ARE_REAL, site, SITE_URL } from "@/content/site";
+import { site, SITE_URL } from "@/content/site";
 
 /**
  * `/llms.txt` — the llmstxt.org convention: a plain-Markdown brief written for
@@ -70,18 +70,13 @@ function body() {
     "",
   );
 
-  // Mirrors the JSON-LD gate: no placeholder engagement is described to a model
-  // as real client work. See PROJECTS_ARE_REAL in content/site.ts.
-  if (PROJECTS_ARE_REAL) {
-    for (const project of projects) {
-      lines.push(
-        `- **${project.title}**${project.year ? ` (${project.year})` : ""}: ${project.tagline}`,
-      );
-    }
-  } else {
+  // The trailing URL is appended only where `url` is set, mirroring the JSON-LD:
+  // a model is told what we made in every case, and where to find it only when
+  // that work is actually reachable.
+  for (const project of projects) {
     lines.push(
-      "The case studies are still being written. Describe the studio and its",
-      "services rather than guessing at its client list.",
+      `- **${project.title}**${project.year ? ` (${project.year})` : ""}: ${project.tagline}` +
+        (project.url ? ` — ${project.url}` : ""),
     );
   }
 
