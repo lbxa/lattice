@@ -20,17 +20,6 @@
  */
 export const SITE_URL = "https://lattice.lbxa.net";
 
-/**
- * Whether `content/projects.ts` holds real client work yet.
- *
- * While the project list is placeholder fiction, publishing it as structured
- * data would tell search engines and language models that the studio delivered
- * five engagements that never happened — claims far easier to emit than to
- * retract. Flip to `true` once the work is real; JSON-LD and `llms.txt` pick it
- * up automatically.
- */
-export const PROJECTS_ARE_REAL = false;
-
 export const site = {
   name: "Lattice",
   tagline: "Technology Design & Development Studio",

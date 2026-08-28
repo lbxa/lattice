@@ -1,5 +1,5 @@
 import { projects } from "@/content/projects";
-import { PROJECTS_ARE_REAL, site, SITE_URL } from "@/content/site";
+import { site, SITE_URL } from "@/content/site";
 
 const ORGANIZATION_ID = `${SITE_URL}/#organization`;
 const FOUNDER_ID = `${SITE_URL}/#founder`;
@@ -82,20 +82,22 @@ function buildGraph() {
     copyrightHolder: { "@id": ORGANIZATION_ID },
   };
 
-  // Held back until content/projects.ts stops being placeholder fiction —
-  // see PROJECTS_ARE_REAL in content/site.ts.
-  const work = PROJECTS_ARE_REAL
-    ? projects.map((project) => ({
-        "@type": "CreativeWork",
-        "@id": `${SITE_URL}/#project-${project.id}`,
-        name: project.title,
-        abstract: project.tagline,
-        description: project.paragraphs.join(" "),
-        ...(project.year ? { dateCreated: project.year } : {}),
-        creator: { "@id": ORGANIZATION_ID },
-        isPartOf: { "@id": WEBSITE_ID },
-      }))
-    : [];
+  // Authorship and URL are deliberately separate claims. `creator` says Lattice
+  // made the work; `url` says where that work lives, and is emitted only when
+  // the thing itself is publicly reachable. A retired app, or one piece of a
+  // client's wider estate, therefore keeps its credit without the graph
+  // asserting we built whatever currently sits at the client's domain.
+  const work = projects.map((project) => ({
+    "@type": "CreativeWork",
+    "@id": `${SITE_URL}/#project-${project.id}`,
+    name: project.title,
+    abstract: project.tagline,
+    description: project.paragraphs.join(" "),
+    ...(project.url ? { url: project.url } : {}),
+    ...(project.year ? { dateCreated: project.year } : {}),
+    creator: { "@id": ORGANIZATION_ID },
+    isPartOf: { "@id": WEBSITE_ID },
+  }));
 
   return {
     "@context": "https://schema.org",

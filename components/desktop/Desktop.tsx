@@ -95,7 +95,11 @@ function IconContextMenu({
 const SIZES: Record<WindowKind, Size> = {
   welcome: { w: 400, h: 320 },
   about: { w: 380, h: 300 },
-  project: { w: 480, h: 380 },
+  // Tall enough to clear a 16:9 hero image and still land on the first
+  // paragraph. Every project in content/projects.ts now opens with one, and at
+  // the old 380 the window filled with picture and the copy began below the
+  // fold — a card you have to scroll before it says anything.
+  project: { w: 480, h: 520 },
 };
 
 function viewport(): Viewport {
@@ -218,7 +222,16 @@ export function Desktop() {
       {/* Icons are `position: fixed` once dragged (see useIconDrag), so they
           escape this box entirely; `pointer-events-none` keeps the now-empty
           container from intercepting marquee drags on the bare desktop. */}
-      <div className="pointer-events-none absolute bottom-3 right-3 top-10 flex flex-col items-center gap-4 max-sm:relative max-sm:mt-10 max-sm:grid max-sm:grid-cols-3 max-sm:justify-items-center max-sm:px-4">
+      {/* `flex-wrap-reverse` + `content-start` so the rail fills the rightmost
+          column first and spills into further columns leftward, the way a real
+          desktop does. Plain `flex-wrap` also fits everything, but puts the
+          first icon in the *left* column and the last against the edge, which
+          reads as scrambled. The column is a fixed box
+          (top-10 → bottom-3) inside an `overflow-hidden` desktop, so without
+          wrapping the trailing icons are simply unreachable: seven icons at
+          80px plus gaps need ~660px of viewport, which a landscape phone or a
+          1024×600 panel does not have. */}
+      <div className="pointer-events-none absolute bottom-3 right-3 top-10 flex flex-col flex-wrap-reverse content-start items-center gap-4 max-sm:relative max-sm:mt-10 max-sm:grid max-sm:grid-cols-3 max-sm:justify-items-center max-sm:px-4">
         {projects.map((project) => {
           const openProject = () => {
             selectOnly(project.id);

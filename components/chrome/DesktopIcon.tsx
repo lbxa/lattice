@@ -70,7 +70,13 @@ export function DesktopIcon({
       // `select-none` rather than preventDefault on pointerdown: it stops the
       // label being text-selected mid-drag without suppressing focus or
       // risking the click that a plain tap depends on.
-      className="group pointer-events-auto flex w-20 select-none flex-col items-center gap-1 outline-none"
+      // Fixed `h-20`, not auto: useIconDrag measures ONE icon (measureIcon) and
+      // moveIcons applies the dragged icon's size to a whole selection, so
+      // every icon has to occupy the same box or clamping misses. Two-line
+      // labels and the taller Read Me glyph both broke that assumption —
+      // heights ran 62/68/80 — which let a tall icon clamp ~18px below the
+      // viewport. 80px is the tallest case: glyph + a two-line clamped label.
+      className="group pointer-events-auto flex h-20 w-20 select-none flex-col items-center gap-1 outline-none"
     >
       <span
         data-selected={highlighted || undefined}
@@ -80,7 +86,11 @@ export function DesktopIcon({
       </span>
       <span
         data-selected={highlighted || undefined}
-        className="max-w-full truncate rounded-xs bg-white/85 px-1 font-pixel text-[12px] text-chrome-ink group-focus-visible:outline-2 group-focus-visible:outline-select data-selected:bg-select data-selected:text-white"
+        // Two lines, then ellipsis — real project names are rarely one word,
+        // and a desktop that truncates "Gabriella Cardoso" to "Gabriella C..."
+        // reads as broken rather than retro. Wrapping is what every desktop
+        // this borrows from actually did.
+        className="max-w-full rounded-xs bg-white/85 px-1 text-center font-pixel text-[12px] text-chrome-ink break-words line-clamp-2 group-focus-visible:outline-2 group-focus-visible:outline-select data-selected:bg-select data-selected:text-white"
       >
         {label}
       </span>
