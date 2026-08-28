@@ -70,7 +70,13 @@ export function DesktopIcon({
       // `select-none` rather than preventDefault on pointerdown: it stops the
       // label being text-selected mid-drag without suppressing focus or
       // risking the click that a plain tap depends on.
-      className="group pointer-events-auto flex w-20 select-none flex-col items-center gap-1 outline-none"
+      // Fixed `h-20`, not auto: useIconDrag measures ONE icon (measureIcon) and
+      // moveIcons applies the dragged icon's size to a whole selection, so
+      // every icon has to occupy the same box or clamping misses. Two-line
+      // labels and the taller Read Me glyph both broke that assumption —
+      // heights ran 62/68/80 — which let a tall icon clamp ~18px below the
+      // viewport. 80px is the tallest case: glyph + a two-line clamped label.
+      className="group pointer-events-auto flex h-20 w-20 select-none flex-col items-center gap-1 outline-none"
     >
       <span
         data-selected={highlighted || undefined}
