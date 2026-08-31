@@ -126,4 +126,17 @@ export const projects: Project[] = [
     links: [{ label: "Visit", href: "https://lucasbarbosa.net" }],
     images: [{ src: "/projects/lucas-barbosa.webp", alt: "The lucasbarbosa.net homepage in dark mode: bracketed terminal-style navigation above a short introduction, with a bronze Lady Justice sculpture rendered below in WebGL." }],
   },
+  {
+    id: "xyz-mathematics-club",
+    url: "https://xyzmaths.org",
+    title: "XYZ Mathematics Club",
+    tagline: "The mathematics left outside the curriculum",
+    year: "2026",
+    paragraphs: [
+      "An archive of the student-founded mathematics club that began when two friends asked to keep studying after hours at Oakhill College. The story runs from a sign-up sheet filled in thirty minutes through seminars on calculus, linear algebra, complex numbers and geometry, to the academic clubs and culture that followed.",
+      "The history reads as one continuous document, with an information rail on one side and its table of contents on the other. Both fold into controls on a phone, leaving the serif article to carry the page. Static Astro delivers the whole account as HTML, with no image or webfont payload and only a slim view-transition script around it.",
+    ],
+    links: [{ label: "Visit", href: "https://xyzmaths.org" }],
+    images: [{ src: "/projects/xyz-mathematics-club.webp", alt: "The XYZ Mathematics Club archive homepage: the club name and introduction in a large serif reading column, framed by information and navigation panels." }],
+  },
 ];
